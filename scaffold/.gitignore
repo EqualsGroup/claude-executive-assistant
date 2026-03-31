@@ -1,0 +1,14 @@
+# Sensitive files that shouldn't be committed
+.env
+.github-token
+*.key
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
