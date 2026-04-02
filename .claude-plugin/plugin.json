@@ -1,16 +1,16 @@
 {
   "name": "secretary",
   "version": "1.0.0",
-  "description": "Personal secretary with persistent memory — tracks your work, people, projects, and org dynamics across sessions. Prepares for meetings, processes email, drafts replies, and keeps everything organized.",
+  "description": "Personal executive assistant with persistent memory — tracks your work, people, projects, and org dynamics across sessions. Prepares for meetings, processes email, drafts replies, and keeps everything organized.",
   "author": {
     "name": "Equals Group"
   },
-  "repository": "https://github.com/EqualsGroup/claude-secretary",
+  "repository": "https://github.com/EqualsGroup/claude-executive-assistant",
   "license": "MIT",
   "keywords": [
     "productivity",
     "memory",
-    "secretary",
+    "executive-assistant",
     "meeting-prep",
     "task-management",
     "people-management"

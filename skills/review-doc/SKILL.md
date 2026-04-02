@@ -44,17 +44,44 @@ Group feedback into:
 - **Disagree / missing** — substantive gaps
 - **Strategic suggestions** — reframings from broader context
 
-### Phase 4: Post or return (main agent)
+### Phase 4: Present review plan (main agent)
+
+Present all planned feedback to the user for approval before posting anything.
+
+```
+## REVIEW: [document name]
+
+### AGREE / FINE AS-IS (X sections)
+| Section | Note |
+
+### COMMENTS TO POST (X comments)
+| # | Section | Type | Comment draft |
+(Type = Partially agree / Disagree / Gap / Strategic)
+
+### STRATEGIC SUGGESTIONS (X items)
+| # | Section | Suggestion |
+
+### MEMORY UPDATES
+| File | Change |
+```
+
+For each comment, show the exact text that would be posted (in the user's voice).
+End with: **"Approve all, or tell me which to edit/drop."**
+
+### Phase 5: Execute (after user confirmation)
+
+Wait for the user to approve or adjust the plan, then execute:
 
 **If posting comments:**
 - One comment per point, anchored to the section. Write in user's voice (see voice guidelines).
 - Keep comments concise: 1-3 sentences, lead with the point.
 - For Notion: use `notion-create-comment` with the specific block ID.
 - For other platforms: use appropriate comment/annotation tools.
+- Only post comments the user has approved.
 
 **If returning locally:** Present inline, save to `$SECRETARY_ROOT/outputs/reviews/YYYY-MM-DD-[doc-name].md`
 
-### Phase 5: Track follow-up
+### Phase 6: Track follow-up
 
 - Add a Track item to `$SECRETARY_ROOT/memory/my-work.md` noting comments were posted, who owns next action, and what to monitor
 - If the review surfaced decisions or positions, update the relevant memory file (dynamics.md for governance positions, projects.md for technical decisions, etc.)
@@ -62,6 +89,7 @@ Group feedback into:
 ## Rules
 
 - Always load full memory context — that's the value of this skill
+- **Never post comments without user approval** — present the plan first, always
 - Write in the user's voice
 - Be substantive, not nitpicky
 - Flag political landmines from dynamics.md

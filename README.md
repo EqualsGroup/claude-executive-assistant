@@ -1,7 +1,7 @@
-# Secretary Plugin
+# Claude Executive Assistant
 
-A personal secretary plugin with persistent memory — tracks your work, people,
-projects, and org dynamics across sessions.
+A personal executive assistant plugin with persistent memory — tracks your work,
+people, projects, and org dynamics across sessions.
 
 ## How It Works
 
