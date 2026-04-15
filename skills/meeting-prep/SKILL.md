@@ -15,7 +15,7 @@ Generate a structured meeting prep document tailored to the meeting type and par
 ### Phase 1: Identify the meeting
 
 **If arguments provided** (e.g. `/meeting-prep standup`, `/meeting-prep 1:1`):
-- Match the argument against meeting definitions in `$SECRETARY_ROOT/memory/meetings.md` by section heading, purpose, or keywords
+- Match the argument against meeting definitions in `$EA_ROOT/memory/meetings.md` by section heading, purpose, or keywords
 - For meetings that need participants (e.g. 1:1): check today's calendar for the next matching event and extract attendees from it — never require the user to specify a name
 
 **If no arguments** (just `/meeting-prep`):
@@ -31,12 +31,12 @@ Generate a structured meeting prep document tailored to the meeting type and par
 **If no upcoming meetings found**, read `meetings.md` and list available meeting types (from section headings and Keywords) as a quick help.
 
 Determine from the matched meeting and calendar event:
-- **Participants** — from the calendar event attendees, cross-referenced with `$SECRETARY_ROOT/memory/people/`
+- **Participants** — from the calendar event attendees, cross-referenced with `$EA_ROOT/memory/people/`
 - **Topic/purpose** — from the meeting definition, or inferred from participant context
 
 ### Phase 2: Gather context (parallel)
 
-Read all relevant memory files from `$SECRETARY_ROOT/` in parallel:
+Read all relevant memory files from `$EA_ROOT/` in parallel:
 - `memory/meetings.md` — the meeting's definition: standing topics, attendees, data sources, output template, prep notes
 - `memory/people/` — files for all participants (working style, coaching points, recent context, performance review insights)
 - `memory/projects.md` — active initiatives relevant to the participants or topic
@@ -54,7 +54,7 @@ The meeting definition in `meetings.md` specifies what data the prep needs under
 | `code-activity` | ~~code connector: commits pushed, PRs opened/merged/reviewed, reviews given. Fetch using the auth method configured in `sync/sources.md` with appropriate date filters |
 | `code-open-prs` | ~~code connector: list all open PRs authored by the user. **For each PR, also fetch review status** and latest commit date. Flag stale reviews where commits were pushed after the last review (likely means feedback was addressed, awaiting re-review) |
 | `calendar` | ~~calendar search for the specified time window (e.g. today, past week) |
-| `previous-output` | Read the most recent `$SECRETARY_ROOT/outputs/meeting-prep/*-[meeting-name].md`. Check its age — see staleness handling in the meeting definition's prep notes |
+| `previous-output` | Read the most recent `$EA_ROOT/outputs/meeting-prep/*-[meeting-name].md`. Check its age — see staleness handling in the meeting definition's prep notes |
 
 Launch data fetches as parallel subagents where possible. Each subagent is **research-only — do NOT edit any files**.
 
@@ -70,13 +70,13 @@ If the meeting has no template in `meetings.md`, generate a sensible prep doc fr
 
 **Enrich with cross-references:**
 - Flag sensitivities from `dynamics.md` that affect any participant or topic
-- For each participant, check their file in `$SECRETARY_ROOT/memory/people/` — surface coaching points, working style, recent interactions relevant to this meeting
+- For each participant, check their file in `$EA_ROOT/memory/people/` — surface coaching points, working style, recent interactions relevant to this meeting
 - Note upcoming deadlines or blockers from `projects.md` and `my-work.md`
 - If a previous output exists, highlight what changed since then (new blockers, completed items, shifted priorities)
 
 ### Phase 5: Save and present
 
-1. **Save first** to `$SECRETARY_ROOT/outputs/meeting-prep/YYYY-MM-DD-[meeting-name].md`
+1. **Save first** to `$EA_ROOT/outputs/meeting-prep/YYYY-MM-DD-[meeting-name].md`
 2. **Then present** key points inline for quick reference
 
 ## Rules
@@ -88,4 +88,4 @@ If the meeting has no template in `meetings.md`, generate a sensible prep doc fr
 - **Flag landmines** — if dynamics.md shows a sensitivity involving this person, call it out explicitly with guidance on how to navigate.
 - **Keep it scannable** — bullet points, not paragraphs. The user reads this 5 minutes before the meeting.
 - **Save before presenting** — don't risk losing the document if the session ends.
-- **Use previous outputs** — the `$SECRETARY_ROOT/outputs/meeting-prep/` directory is your historical record. Use it for planned-vs-actual comparisons, continuity, and tracking commitments across meetings.
+- **Use previous outputs** — the `$EA_ROOT/outputs/meeting-prep/` directory is your historical record. Use it for planned-vs-actual comparisons, continuity, and tracking commitments across meetings.

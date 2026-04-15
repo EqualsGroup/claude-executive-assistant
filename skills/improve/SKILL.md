@@ -41,7 +41,7 @@ Phase 4: Report + timestamp (main agent — structured summary, update last-impr
 ### Phase 1: Read & Extract (main agent)
 
 **Step 1 — Read all files in parallel:**
-Read everything from `$SECRETARY_ROOT/`:
+Read everything from `$EA_ROOT/`:
 - All memory files in `memory/`
 - `CLAUDE.md`
 - `sync/sources.md`
@@ -50,9 +50,9 @@ Read everything from `$SECRETARY_ROOT/`:
 
 **Step 2 — Extract session messages since last improve:**
 
-Check when `/improve` was last run — the timestamp is on line 1 of `$SECRETARY_ROOT/CLAUDE.md`:
+Check when `/improve` was last run — the timestamp is on line 1 of `$EA_ROOT/CLAUDE.md`:
 ```bash
-head -1 $SECRETARY_ROOT/CLAUDE.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}Z' || echo "never"
+head -1 $EA_ROOT/CLAUDE.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}Z' || echo "never"
 ```
 The format is `*Last improved: 2026-03-17T15:30Z*`. If no timestamp found, default to 7 days ago.
 
@@ -66,7 +66,7 @@ Sessions are stored under `claude-code-sessions/` (current) or `local-agent-mode
 
 **Search both locations, use whichever exist:**
 ```bash
-LAST_IMPROVE=$(head -1 $SECRETARY_ROOT/CLAUDE.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}Z' || echo "")
+LAST_IMPROVE=$(head -1 $EA_ROOT/CLAUDE.md | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}Z' || echo "")
 if [ -z "$LAST_IMPROVE" ]; then
   DAYS_AGO=7
 else
@@ -92,9 +92,9 @@ find ~/Library/Application\ Support/Claude/local-agent-mode-sessions/ -name "*.j
 
 Combine all results. **Filter to EA sessions only** — most session files won't be EA-related. For each candidate file, do a quick check before full parsing:
 ```bash
-grep -l "SECRETARY_ROOT" "$file" 2>/dev/null
+grep -l "EA_ROOT" "$file" 2>/dev/null
 ```
-Only process files that contain `SECRETARY_ROOT` — this confirms the EA plugin was active in that session. Discard the rest.
+Only process files that contain `EA_ROOT` — this confirms the EA plugin was active in that session. Discard the rest.
 
 If no EA session files are found in any location, skip session mining entirely — the architecture/hygiene subagents (5, 6, 7) don't need session data and should still run.
 
@@ -194,7 +194,7 @@ Launch all 7 subagents simultaneously. Each is research-only — returns structu
 **Output:** Categorized list of issues with file, section, and recommended action
 
 #### Subagent 7: Outputs Cleanup
-**Input:** List of all files in `$SECRETARY_ROOT/outputs/` directory + all memory file contents
+**Input:** List of all files in `$EA_ROOT/outputs/` directory + all memory file contents
 **Task:**
 - For each file in `outputs/` (meeting preps, proposals, assessments, announcements, transcripts, etc.):
   1. Read the file content
@@ -246,11 +246,11 @@ Present as a single list for user to approve/reject:
 
 ### Phase 4: Report + Timestamp (main agent)
 
-**Update the last-improve marker** on line 1 of `$SECRETARY_ROOT/CLAUDE.md` at the end of a successful run:
+**Update the last-improve marker** on line 1 of `$EA_ROOT/CLAUDE.md` at the end of a successful run:
 ```bash
 NEW_TS=$(date -u +%Y-%m-%dT%H:%MZ)
 ```
-Then edit line 1 of `$SECRETARY_ROOT/CLAUDE.md` to: `*Last improved: $NEW_TS*`
+Then edit line 1 of `$EA_ROOT/CLAUDE.md` to: `*Last improved: $NEW_TS*`
 
 **Report template:**
 

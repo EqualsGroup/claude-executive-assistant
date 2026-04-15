@@ -106,7 +106,7 @@ help me get set up
 
 The setup wizard detects your environment and walks you through everything:
 
-1. **Finds your persistent folder** — Cowork mount or `~/secretary/`
+1. **Finds your persistent folder** — Cowork mount or `~/claude-executive-assistant/`
 2. **Creates the memory structure** — the filing cabinet for your context
 3. **Checks your connectors** — Slack, Notion, GitHub, email, etc.
 4. **Sets up GitHub** *(optional)* — enables PR tracking and activity syncing
@@ -117,7 +117,7 @@ The setup wizard detects your environment and walks you through everything:
 <summary><b>Cowork (Claude Desktop / Web)</b></summary>
 
 Start a **Project session** with a folder selected, then run `/ea:setup`.
-The wizard creates a `secretary/` directory in your selected folder.
+The wizard creates a `claude-executive-assistant/` directory in your selected folder.
 
 **Important:** Use a Project session, not a Task session. Task sessions have
 no persistent storage — memory files would be lost.
@@ -126,10 +126,10 @@ no persistent storage — memory files would be lost.
 <details>
 <summary><b>Claude Code (CLI) / Claude Desktop</b></summary>
 
-Run `/ea:setup` from any project. Memory is stored in `~/secretary/`
+Run `/ea:setup` from any project. Memory is stored in `~/claude-executive-assistant/`
 by default — shared across all your projects so context is always available.
 
-If you have existing secretary files from a previous setup, the wizard will
+If you have existing EA files from a previous setup, the wizard will
 detect them and offer to migrate.
 </details>
 
@@ -195,7 +195,7 @@ Skills reference generic connector categories (`~~messaging`, `~~email`,
 ## Memory Structure
 
 ```
-secretary/
+claude-executive-assistant/
 ├── CLAUDE.md              # Hot cache (~100 lines) — loaded every session
 ├── memory/
 │   ├── my-work.md         # Tasks, priorities, wins, goals
@@ -219,13 +219,13 @@ Everything is plain markdown. You can read it and edit it directly.
 
 ## Customization
 
-**Company context** — Edit files in `secretary/memory/` to add your org
+**Company context** — Edit files in `claude-executive-assistant/memory/` to add your org
 structure, projects, people profiles, and meeting schedules.
 
 **Voice** — The `## User Voice` section in your CLAUDE.md defines how drafted
 text sounds. Loaded every session, always active.
 
-**Sync sources** — Edit `secretary/sync/sources.md` to add Notion databases,
+**Sync sources** — Edit `claude-executive-assistant/sync/sources.md` to add Notion databases,
 Slack channels, and other sources to monitor.
 
 ## Multi-Device Access
@@ -252,7 +252,7 @@ plugin/
 The key design decision: **the plugin is stateless**. All persistent state
 lives in your folder, not in the plugin. Plugin updates never touch your
 data. The SessionStart hook auto-detects the memory location across
-environments — Cowork mounted folder or local `~/secretary/`.
+environments — Cowork mounted folder or local `~/claude-executive-assistant/`.
 
 ## License
 

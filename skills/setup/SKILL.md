@@ -11,67 +11,67 @@ description: >
 
 ### Phase 0: Detect Environment
 
-1. Check the session context for `SECRETARY_ROOT`. If the SessionStart hook
+1. Check the session context for `EA_ROOT`. If the SessionStart hook
    already output it, use that path.
 2. If not set, detect the environment:
    - **Cowork**: Look for a user-mounted folder under `/sessions/*/mnt/` (any
      directory that is not `outputs` or `uploads`). If found, set
-     `SECRETARY_ROOT` to `{mount}/secretary`.
-   - **Claude Code / local dev**: Use `~/secretary/` (shared across all projects).
+     `EA_ROOT` to `{mount}/claude-executive-assistant`.
+   - **Claude Code / local dev**: Use `~/claude-executive-assistant/` (shared across all projects).
    - **Task session** (Cowork with no mount): Stop and tell the user:
      "EA needs a Project session with a folder selected. Please start
      a new Project and select your EA folder."
-3. If `$SECRETARY_ROOT/memory` already exists, skip to Phase 0b then Phase 2.
-4. If `$SECRETARY_ROOT` doesn't exist yet, confirm:
-   "I'll create `~/secretary/` to store your persistent memory. This folder
+3. If `$EA_ROOT/memory` already exists, skip to Phase 0b then Phase 2.
+4. If `$EA_ROOT` doesn't exist yet, confirm:
+   "I'll create `~/claude-executive-assistant/` to store your persistent memory. This folder
    is shared across all your projects. OK?"
 
 ### Phase 0b: Migration Check
 
-Check if the SessionStart hook set `LOCAL_SECRETARY` — this means the current
-working directory has secretary files (from the old clone-based setup) that
+Check if the SessionStart hook set `LOCAL_EA` — this means the current
+working directory has EA files (from the old clone-based setup) that
 differ from the shared location.
 
-Also independently scan for secretary files in the current directory (`memory/`
+Also independently scan for EA files in the current directory (`memory/`
 dir + `CLAUDE.md` present) even if the hook didn't flag it.
 
 **If local files found and shared location is empty (first-time plugin install):**
-- Offer to move: "I found existing secretary files in `[cwd]`. Want me to move
-  them to `~/secretary/` so they're shared across all your projects?"
-- If yes: move all files, update `SECRETARY_ROOT`, continue setup.
+- Offer to move: "I found existing EA files in `[cwd]`. Want me to move
+  them to `~/claude-executive-assistant/` so they're shared across all your projects?"
+- If yes: move all files, update `EA_ROOT`, continue setup.
 - If no: ask if they want to keep using the current directory instead. If yes,
-  set `SECRETARY_ROOT` to the current directory and continue.
+  set `EA_ROOT` to the current directory and continue.
 
 **If local files found and shared location also has files (merge scenario):**
 - For each file, compare by modification date:
   - **Exists in both locations:** keep the more recently modified version.
   - **Exists only in one location:** copy it to the other.
-- Offer: "Both `[cwd]` and `~/secretary/` have secretary files. I can merge them
+- Offer: "Both `[cwd]` and `~/claude-executive-assistant/` have EA files. I can merge them
   — for each file, I'll keep the most recent version. Want me to show you the
   plan first?"
 - Always show the merge plan before executing. List each file, which version wins,
   and why (modification date).
-- After merge, the shared location (`~/secretary/`) becomes the single source of
+- After merge, the shared location (`~/claude-executive-assistant/`) becomes the single source of
   truth. Offer to clean up the local copy.
 
 ### Phase 1: Initialize Memory Folder
 
 ```bash
-mkdir -p "$SECRETARY_ROOT/memory/people"
-mkdir -p "$SECRETARY_ROOT/outputs/meeting-prep"
-mkdir -p "$SECRETARY_ROOT/outputs/assessments"
-mkdir -p "$SECRETARY_ROOT/outputs/drafts"
-mkdir -p "$SECRETARY_ROOT/outputs/proposals"
-mkdir -p "$SECRETARY_ROOT/outputs/reviews"
-mkdir -p "$SECRETARY_ROOT/sync"
+mkdir -p "$EA_ROOT/memory/people"
+mkdir -p "$EA_ROOT/outputs/meeting-prep"
+mkdir -p "$EA_ROOT/outputs/assessments"
+mkdir -p "$EA_ROOT/outputs/drafts"
+mkdir -p "$EA_ROOT/outputs/proposals"
+mkdir -p "$EA_ROOT/outputs/reviews"
+mkdir -p "$EA_ROOT/sync"
 ```
 
-Copy scaffold templates from the plugin's `scaffold/` directory into `$SECRETARY_ROOT/`.
+Copy scaffold templates from the plugin's `scaffold/` directory into `$EA_ROOT/`.
 Use `${CLAUDE_PLUGIN_ROOT}/scaffold/` to locate them.
 
 Initialize git:
 ```bash
-cd "$SECRETARY_ROOT" && git init && git add -A && git commit -m "Initialize EA memory"
+cd "$EA_ROOT" && git init && git add -A && git commit -m "Initialize EA memory"
 ```
 
 ### Phase 2: Check connector and tool availability
@@ -158,7 +158,7 @@ Also check for GitHub access — try methods in order until one works:
 
    - Explain: "In this environment we can't use the `gh` CLI, but we can use
      the GitHub API directly with a Personal Access Token (PAT)."
-   - Check if a token already exists at `$SECRETARY_ROOT/.github-token`. If
+   - Check if a token already exists at `$EA_ROOT/.github-token`. If
      it does, verify it works (see verification step below). If valid, skip
      token creation.
    - If no token exists, offer two paths:
@@ -186,7 +186,7 @@ Also check for GitHub access — try methods in order until one works:
         - Metadata: Read-only (auto-selected)
      6. Click **"Generate token"**
      7. Read the token value from the page
-     8. Save it to `$SECRETARY_ROOT/.github-token`
+     8. Save it to `$EA_ROOT/.github-token`
 
      If any step fails unexpectedly (CAPTCHA, 2FA prompt, page layout
      doesn't match, or the token value can't be read), fall back to
@@ -216,25 +216,25 @@ Also check for GitHub access — try methods in order until one works:
      Once the user provides the token, save it.
 
    - **Ensure `.github-token` is gitignored before saving** — existing
-     secretary folders from before this feature may not have the entry.
-     If the secretary folder is a git repo, check and fix first:
+     EA folders from before this feature may not have the entry.
+     If the EA folder is a git repo, check and fix first:
      ```bash
-     if [ -d "$SECRETARY_ROOT/.git" ]; then
-       grep -qxF '.github-token' "$SECRETARY_ROOT/.gitignore" 2>/dev/null || \
-         echo '.github-token' >> "$SECRETARY_ROOT/.gitignore"
+     if [ -d "$EA_ROOT/.git" ]; then
+       grep -qxF '.github-token' "$EA_ROOT/.gitignore" 2>/dev/null || \
+         echo '.github-token' >> "$EA_ROOT/.gitignore"
      fi
      ```
      In Cowork there's no git repo, so this step is skipped — the token
-     lives in the mounted cloud folder alongside the rest of the secretary
+     lives in the mounted cloud folder alongside the rest of the EA
      files.
    - Save the token (both paths):
      ```bash
-     printf '%s' "{token}" > "$SECRETARY_ROOT/.github-token"
-     chmod 600 "$SECRETARY_ROOT/.github-token"
+     printf '%s' "{token}" > "$EA_ROOT/.github-token"
+     chmod 600 "$EA_ROOT/.github-token"
      ```
    - **Verify the token** by running:
      ```bash
-     curl -s -H "Authorization: Bearer $(cat "$SECRETARY_ROOT/.github-token")" \
+     curl -s -H "Authorization: Bearer $(cat "$EA_ROOT/.github-token")" \
        https://api.github.com/user | jq -r .login
      ```
      If this returns a username, the token works. Set Auth Method to
@@ -263,7 +263,7 @@ Fill in what we can before asking the user anything:
 
 ### Phase 4: Gather remaining information interactively
 
-Scan all `.md` files in `$SECRETARY_ROOT/` for square bracket placeholders that
+Scan all `.md` files in `$EA_ROOT/` for square bracket placeholders that
 were not already filled by Phase 3. Ignore placeholders in code blocks, markdown
 links, checkboxes, HTML comments, and template examples.
 
@@ -282,8 +282,8 @@ Fill in all placeholders. Present summary. Ask: "Want me to run
 
 ## Rules
 
-- Check if `$SECRETARY_ROOT/` already exists FIRST — don't overwrite user's data
+- Check if `$EA_ROOT/` already exists FIRST — don't overwrite user's data
 - Don't overwhelm — batch questions, be conversational
 - Use available connectors to auto-populate instead of asking
 - Skip template examples (meeting prep templates stay as patterns)
-- Initialize git in `$SECRETARY_ROOT/` — version history is valuable
+- Initialize git in `$EA_ROOT/` — version history is valuable

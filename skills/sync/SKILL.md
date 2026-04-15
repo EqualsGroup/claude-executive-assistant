@@ -10,7 +10,7 @@ description: >
 
 ### Phase 1: Read current state (parallel)
 
-Read these files from `$SECRETARY_ROOT/` in parallel:
+Read these files from `$EA_ROOT/` in parallel:
 - `sync/sources.md` — all source URLs, channel IDs, key contacts
 - `memory/company.md`
 - `memory/people/` — all person files
@@ -70,7 +70,7 @@ immediately before its first API call and return it as `pull_timestamp`.
   `gh auth status`. If the command fails (binary not found or not authenticated),
   skip GitHub sync and note it in the results. Otherwise use `gh api` commands
   as shown below.
-  **If `api-token`:** Read the token from `$SECRETARY_ROOT/.github-token` and use
+  **If `api-token`:** Read the token from `$EA_ROOT/.github-token` and use
   `curl` with `-H "Authorization: Bearer {token}"` against `https://api.github.com/`.
   If the token file is missing or empty, skip GitHub sync and note it in the results.
 

@@ -23,7 +23,7 @@ Run this after plugin updates, or periodically to catch drift.
 ```
 Phase 1: Read (main agent, parallel reads)
     │
-    ├── Read all user data files from $SECRETARY_ROOT/
+    ├── Read all user data files from $EA_ROOT/
     ├── Read all scaffold templates from ${CLAUDE_PLUGIN_ROOT}/scaffold/
     │
     ▼
@@ -50,7 +50,7 @@ Parallel subagents cut wall-clock time. The main agent handles all file I/O.
 
 **Step 1 — Read all user data files in parallel:**
 
-From `$SECRETARY_ROOT/`:
+From `$EA_ROOT/`:
 - `CLAUDE.md`
 - All files in `memory/` (including `memory/people/*`)
 - `sync/sources.md`
@@ -299,7 +299,7 @@ Present as a single list for user to approve/reject:
 ## Upgrade Summary
 
 **Plugin version:** [version from plugin.json]
-**Data location:** $SECRETARY_ROOT
+**Data location:** $EA_ROOT
 
 ### Structure Alignment
 

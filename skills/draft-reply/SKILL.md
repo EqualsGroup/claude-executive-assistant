@@ -20,7 +20,7 @@ From the user's message, determine:
 
 ### Phase 2: Gather context (parallel)
 
-**Always read from $SECRETARY_ROOT/:**
+**Always read from $EA_ROOT/:**
 - `memory/people/[recipient].md`
 - `memory/dynamics.md` — sensitivities involving this person or topic
 - `memory/my-work.md` — related priorities or commitments
@@ -58,11 +58,11 @@ From the user's message, determine:
 
 **If the user approves sending:**
 - Send via the appropriate connector (~~messaging, ~~email, ~~documents)
-- If a commitment was made in the reply, add it to `$SECRETARY_ROOT/memory/my-work.md`
+- If a commitment was made in the reply, add it to `$EA_ROOT/memory/my-work.md`
 - If the reply reveals a decision or position, update relevant memory file
 
 **If the user just wanted the draft:**
-- Save to `$SECRETARY_ROOT/outputs/drafts/YYYY-MM-DD-[recipient]-[topic].md` if substantive
+- Save to `$EA_ROOT/outputs/drafts/YYYY-MM-DD-[recipient]-[topic].md` if substantive
 - No memory updates needed unless the user explicitly decides something
 
 ## Rules

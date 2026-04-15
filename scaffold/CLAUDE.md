@@ -10,15 +10,15 @@ The `memory/` directory contains structured knowledge. **CLAUDE.md is loaded eve
 
 ### Path Resolution
 
-The SessionStart hook outputs `SECRETARY_ROOT=<path>` at the top of every session.
+The SessionStart hook outputs `EA_ROOT=<path>` at the top of every session.
 This is the absolute path to your persistent memory folder. **All file operations use that path as the base.**
 
 - In Cowork: the root is inside your mounted project folder
-- In Claude Code / local dev: the root is `~/secretary/` (shared across all projects)
+- In Claude Code / local dev: the root is `~/claude-executive-assistant/` (shared across all projects)
 
-**Do NOT use `~/secretary/`, `$HOME/secretary/`, or any path under `$HOME` in Cowork** — `$HOME` is an ephemeral session directory destroyed when the session ends.
+**Do NOT use `~/claude-executive-assistant/`, `$HOME/claude-executive-assistant/`, or any path under `$HOME` in Cowork** — `$HOME` is an ephemeral session directory destroyed when the session ends.
 
-If no SECRETARY_ROOT was set by the hook, check whether persistent storage is available before proceeding with any file operations.
+If no EA_ROOT was set by the hook, check whether persistent storage is available before proceeding with any file operations.
 
 ### Memory File Registry
 

@@ -22,7 +22,7 @@ From the user's message, determine:
 - Other URL: fetch the content
 - Pasted: use directly
 
-**Memory context from $SECRETARY_ROOT/ (parallel reads):**
+**Memory context from $EA_ROOT/ (parallel reads):**
 - `memory/people/` — files for author and anyone mentioned
 - `memory/dynamics.md` — sensitivities involving the topic or people
 - `memory/projects.md` — related initiatives
@@ -79,11 +79,11 @@ Wait for the user to approve or adjust the plan, then execute:
 - For other platforms: use the appropriate comment/annotation tools.
 - Only post comments the user has approved.
 
-**If returning locally:** Present inline, save to `$SECRETARY_ROOT/outputs/reviews/YYYY-MM-DD-[doc-name].md`
+**If returning locally:** Present inline, save to `$EA_ROOT/outputs/reviews/YYYY-MM-DD-[doc-name].md`
 
 ### Phase 6: Track follow-up
 
-- Add a Track item to `$SECRETARY_ROOT/memory/my-work.md` noting comments were posted, who owns next action, and what to monitor
+- Add a Track item to `$EA_ROOT/memory/my-work.md` noting comments were posted, who owns next action, and what to monitor
 - If the review surfaced decisions or positions, update the relevant memory file (dynamics.md for governance positions, projects.md for technical decisions, etc.)
 
 ## Rules

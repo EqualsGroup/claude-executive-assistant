@@ -83,7 +83,7 @@ Use cached IDs below instead of looking up at sync time. Refresh cache periodica
 <!-- Auth method is set automatically by /ea:setup.
      - env-token: Uses GITHUB_TOKEN or GH_TOKEN from the environment (no file needed)
      - gh-cli: Uses `gh` CLI authenticated via system keyring (Claude Code / local dev)
-     - api-token: Uses a Personal Access Token stored in $SECRETARY_ROOT/.github-token (Cowork / environments without gh CLI)
+     - api-token: Uses a Personal Access Token stored in $EA_ROOT/.github-token (Cowork / environments without gh CLI)
      Run /ea:setup again to reconfigure. -->
 
 ### What to Sync

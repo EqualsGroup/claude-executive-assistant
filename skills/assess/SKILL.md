@@ -13,7 +13,7 @@ Run the performance assessment comparison workflow for a named report.
 
 ### Phase 1: Check existing files
 
-Check `$SECRETARY_ROOT/outputs/assessments/[name]/` for:
+Check `$EA_ROOT/outputs/assessments/[name]/` for:
 - `manager-assessment-YYYY.md`
 - `self-assessment-YYYY.md`
 
@@ -28,9 +28,9 @@ Use current year. Directory uses the same `[first-last]` format as people files
 
 **Read memory context (parallel):**
 - Both assessment files
-- `$SECRETARY_ROOT/memory/people/[name].md`
-- `$SECRETARY_ROOT/memory/dynamics.md`
-- `$SECRETARY_ROOT/memory/meetings.md` — their 1:1 prep notes
+- `$EA_ROOT/memory/people/[name].md`
+- `$EA_ROOT/memory/dynamics.md`
+- `$EA_ROOT/memory/meetings.md` — their 1:1 prep notes
 
 ### Phase 4: Analysis
 
@@ -79,18 +79,18 @@ Produce a structured comparison:
 
 ### Phase 6: Save output
 
-Save to `$SECRETARY_ROOT/outputs/assessments/[name]/comparison-YYYY.md`
+Save to `$EA_ROOT/outputs/assessments/[name]/comparison-YYYY.md`
 
 ## Trigger Rules
 
 **When a self-assessment completion notification arrives** (e.g. from the HR system):
-1. Check if `$SECRETARY_ROOT/outputs/assessments/[name]/self-assessment-YYYY.md` already exists
+1. Check if `$EA_ROOT/outputs/assessments/[name]/self-assessment-YYYY.md` already exists
 2. If not, fetch the self-assessment content and save it there
 3. If both manager and self assessment now exist, run the Assessment Comparison Workflow (Phase 4+5+6 above)
 
-**Checking assessment status:** Before asking the user whether reviews are complete, always check `$SECRETARY_ROOT/outputs/assessments/` to see what files exist. The presence of files tells you the answer.
+**Checking assessment status:** Before asking the user whether reviews are complete, always check `$EA_ROOT/outputs/assessments/` to see what files exist. The presence of files tells you the answer.
 
-**Fetching assessments from HR system:** Use Claude's own Chrome integration (`mcp__claude-in-chrome__*` tools) to navigate to the HR system (see `$SECRETARY_ROOT/memory/company.md > Service URLs` for the URL) and fetch assessment content. Do NOT use other Chrome MCPs (e.g. `mcp__chrome-devtools__*`) as they don't share browser sessions/cookies. This is an ad-hoc browser task, not part of the /sync flow.
+**Fetching assessments from HR system:** Use Claude's own Chrome integration (`mcp__claude-in-chrome__*` tools) to navigate to the HR system (see `$EA_ROOT/memory/company.md > Service URLs` for the URL) and fetch assessment content. Do NOT use other Chrome MCPs (e.g. `mcp__chrome-devtools__*`) as they don't share browser sessions/cookies. This is an ad-hoc browser task, not part of the /sync flow.
 
 ## Rules
 

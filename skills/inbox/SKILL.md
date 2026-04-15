@@ -10,7 +10,7 @@ description: >
 
 ### Phase 1+2: Load context and read inbox (parallel)
 
-**Context (parallel reads from $SECRETARY_ROOT/):**
+**Context (parallel reads from $EA_ROOT/):**
 - `memory/people/` — list filenames only (resolve people lazily per email)
 - `memory/projects.md` — active initiatives
 - `memory/my-work.md` — current work items
@@ -94,10 +94,10 @@ Wait for user to approve the plan, then execute:
 
 - Delete approved emails
 - Archive approved emails
-- Log action items to `$SECRETARY_ROOT/memory/my-work.md`:
+- Log action items to `$EA_ROOT/memory/my-work.md`:
   - Add to the appropriate tier (Now/Next/Later) in the Master List
   - Include who's involved, deadlines, and blockers inline
-- Update the relevant person's file in `$SECRETARY_ROOT/memory/people/` with context
+- Update the relevant person's file in `$EA_ROOT/memory/people/` with context
 
 #### Browser execution for delete/archive
 
@@ -174,4 +174,4 @@ After processing, report:
 - **Re-read the page after every deletion/archive** to get fresh element references. Email clients often invalidate refs on every DOM change.
 - Prefer DELETE over ARCHIVE — if data lives elsewhere, delete the email
 - When in doubt about an email, put it in the DECIDE category rather than guessing
-- **Self-assessment completion emails (TRIGGER):** When an HR system email says someone completed their self-assessment, check if `$SECRETARY_ROOT/outputs/assessments/[name]/self-assessment-YYYY.md` exists. If not, flag as action item: "Fetch and save [Name]'s self-assessment, then run comparison with manager assessment." If both assessments now exist, trigger the Assessment Comparison Workflow (see assess skill). Delete the email after processing — the data is saved locally and in the HR system.
+- **Self-assessment completion emails (TRIGGER):** When an HR system email says someone completed their self-assessment, check if `$EA_ROOT/outputs/assessments/[name]/self-assessment-YYYY.md` exists. If not, flag as action item: "Fetch and save [Name]'s self-assessment, then run comparison with manager assessment." If both assessments now exist, trigger the Assessment Comparison Workflow (see assess skill). Delete the email after processing — the data is saved locally and in the HR system.

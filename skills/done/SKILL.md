@@ -12,7 +12,7 @@ Process the user's "done" items and update all memory files accordingly.
 
 ### Phase 1: Read current state (parallel)
 
-Read all memory files from `$SECRETARY_ROOT/` in parallel:
+Read all memory files from `$EA_ROOT/` in parallel:
 - `memory/my-work.md`
 - `memory/projects.md`
 - `memory/people/` — read all person files
