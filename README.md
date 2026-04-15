@@ -11,7 +11,6 @@ while your **persistent memory lives in a folder you choose**. Think of it as
 giving Claude a filing cabinet that survives between conversations.
 
 - Memory persists across sessions — no more re-explaining your org
-- Git-tracked by default — full version history of what changed and when
 - Plugin updates don't touch your data — they're completely separate
 
 ## See It In Action
@@ -216,19 +215,7 @@ secretary/
     └── sources.md         # External source configuration
 ```
 
-Everything is plain markdown. You can read it, edit it, or `git diff` it.
-
-## Version History
-
-The `secretary/` folder is git-initialized during setup. Memory files are
-clean snapshots of current truth — git provides the changelog:
-
-```bash
-cd secretary
-git log --oneline           # What changed and when
-git diff HEAD~1             # The last update
-git log -- memory/people/   # Track changes to people files
-```
+Everything is plain markdown. You can read it and edit it directly.
 
 ## Customization
 
