@@ -1,0 +1,20 @@
+{
+  "name": "claude-executive-assistant",
+  "owner": {
+    "name": "Equals Group"
+  },
+  "metadata": {
+    "description": "Marketplace for the Claude Executive Assistant plugin — a personal assistant with persistent memory.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "ea",
+      "description": "Personal executive assistant with persistent memory — tracks your work, people, projects, and org dynamics across sessions. Prepares for meetings, processes email, drafts replies, and keeps everything organized.",
+      "source": "./",
+      "version": "1.0.0",
+      "keywords": ["productivity", "memory", "executive-assistant", "meeting-prep", "task-management", "people-management"],
+      "category": "productivity"
+    }
+  ]
+}
