@@ -14,9 +14,11 @@ description: >
 1. Check the session context for `EA_ROOT`. If the SessionStart hook
    already output it, use that path.
 2. If not set, detect the environment:
-   - **Cowork**: Look for a user-mounted folder under `/sessions/*/mnt/` (any
-     directory that is not `outputs` or `uploads`). If found, set
-     `EA_ROOT` to `{mount}/claude-executive-assistant`.
+   - **Cowork**: Use the project folder the user selected (it's in your session
+     context) and set `EA_ROOT` to `{mount}/claude-executive-assistant`. From a
+     sandbox shell the mount is also visible under `/sessions/*/mnt/` (any
+     directory that is not `outputs` or `uploads`) — but note the SessionStart
+     hook runs on the host, where `/sessions` does not exist.
    - **Claude Code / local dev**: Use `~/claude-executive-assistant/` (shared across all projects).
    - **Task session** (Cowork with no mount): Stop and tell the user:
      "EA needs a Project session with a folder selected. Please start
