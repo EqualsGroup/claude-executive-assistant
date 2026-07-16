@@ -16,6 +16,8 @@ This is the absolute path to your persistent memory folder. **All file operation
 - In Cowork: the root is inside your mounted project folder
 - In Claude Code / local dev: the root is `~/claude-executive-assistant/` (shared across all projects)
 
+If the hook outputs `EA_ROOT=UNRESOLVED` (in Cowork the hook runs on the host and may not find the mount), resolve it yourself: `EA_ROOT` = the folder the user selected + `/claude-executive-assistant`. Read `EA_ROOT/CLAUDE.md` before any other work.
+
 **Do NOT use `~/claude-executive-assistant/`, `$HOME/claude-executive-assistant/`, or any path under `$HOME` in Cowork** — `$HOME` is an ephemeral session directory destroyed when the session ends.
 
 If no EA_ROOT was set by the hook, check whether persistent storage is available before proceeding with any file operations.
@@ -65,6 +67,8 @@ The `sync/sources.md` file lists all external sources (Notion, Slack, GitHub) to
 - Team structure: [describe]
 
 ## Output Conventions
+
+**Every generated file goes under `$EA_ROOT/outputs/` — never in the mounted project folder root and never in `$EA_ROOT/` root.** This overrides any platform default of saving deliverables to the workspace folder root. If no listed category fits, create one: `outputs/[category]/...`.
 
 - **`outputs/`** — Meeting prep docs, drafts, and other generated artifacts go here
 - Meeting prep docs: `outputs/meeting-prep/YYYY-MM-DD-[meeting-name].md`
