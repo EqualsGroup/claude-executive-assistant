@@ -77,6 +77,10 @@ The `sync/sources.md` file lists all external sources (Notion, Slack, GitHub) to
 - Reviews: `outputs/reviews/YYYY-MM-DD-[doc-name].md`
 - Assessments: `outputs/assessments/[name]/` — contains `manager-assessment-YYYY.md` (your assessment of the report) and `self-assessment-YYYY.md` (the report's self-assessment). When both exist for a person, the assess skill runs a comparison workflow.
 
+**`outputs/` is periodically purged by `/ea:improve`** — anything whose value outlives the artifact must be digested into a memory file first. Two things never belong in `outputs/`:
+- **Sync reports** go in `sync/YYYY-MM-DD-[run]-sync-report.md`.
+- **Live operational config** (scheduled-task prompts, standing team guides) goes in `reference/` at the root, not under `outputs/`.
+
 ## Proactive Execution
 
 **Never ask whether to run a skill, sync action, or memory update when the context clearly calls for it.** If the user shares updates — reconcile against current state immediately. If they mention completing tasks — process them as done. The system exists to reduce effort, not to add confirmation prompts.
@@ -104,6 +108,16 @@ Every file is a **clean snapshot of current truth** — not a log of Claude's le
 4. **Git is the changelog.** Version history lives in git, not in the files.
 5. **Single record per fact.** Find the existing entry and update it in place.
 6. **Evidence links required.** When logging issues, incidents, process violations, or performance concerns, always include links to the source (Slack threads, PRs, release approvals, etc.). These records will be referenced in conversations with people later — claims without evidence aren't actionable. Search Slack/GitHub to find the links if they weren't provided.
+7. **No dated sections in memory files.** A heading in a memory file names a **topic**, never a date or a run. `## Recent Changes (August 4, midday sync)`, `## August 3 Inbox Triage`, `### July 30 sync — no new developments`, and `(added by ... sync)` are all violations. New content goes **inside** one of the canonical sections listed in the Format reference above.
+
+   **Self-check before any write to a memory file:** if the heading you are about to create contains a month name, a date, the word "sync", or "(added by ...)", stop — you have the wrong destination. Find the canonical section instead.
+
+   **Precedent is not permission.** If a memory file already contains dated sections, that is existing drift, not the format. Do not match it.
+
+   **If a run finds nothing for a file, write nothing to that file.** Do not record "no new developments" — that belongs in the sync report.
+
+   Run history lives in `sync/` reports and in git, never in `memory/`.
+8. **Merge, don't append.** Superseded text is rewritten in place, not left alongside the new version. Removing an entry is correct when new findings supersede or resolve it — that is not the same as deleting unrelated content, which you should never do.
 
 ### Scope Rules
 

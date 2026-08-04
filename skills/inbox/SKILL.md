@@ -97,6 +97,8 @@ Wait for user to approve the plan, then execute:
 - Log action items to `$EA_ROOT/memory/my-work.md`:
   - Add to the appropriate tier (Now/Next/Later) in the Master List
   - Include who's involved, deadlines, and blockers inline
+  - **Add the item as a bullet inside the tier. Do NOT create a dated section** (e.g. `## August 4 Inbox Triage`) in my-work.md or any other memory file. The triage narrative belongs in the summary shown to the user, not in memory.
+  - Route any non-action content to the canonical section named in the sync skill's Phase 3 routing table — same destinations, same merge-don't-append rule.
 - Update the relevant person's file in `$EA_ROOT/memory/people/` with context
 
 #### Browser execution for delete/archive

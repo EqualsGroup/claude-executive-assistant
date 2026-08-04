@@ -91,22 +91,54 @@ immediately before its first API call and return it as `pull_timestamp`.
 After all subagents return:
 
 1. Compare results against current memory files
-2. Draft proposed changes grouped by file:
-   - **projects.md** — new/updated initiatives, status changes, active PRs showing current engineering work
-   - **memory/people/** — new info about individuals, working style observations, collaboration patterns (create or update per-person files)
-   - **company.md** — org structure changes, domain assignments
-   - **my-work.md** — new action items, commitments discovered in ~~messaging, PRs pending review, in-flight PRs authored
-   - **dynamics.md** — team dynamics, relationships, sensitivities observed
-   - **meetings.md** — if any meeting-related info surfaces
+2. Draft proposed changes. **Every change must name a target file AND a target section that already exists in that file.** If nothing fits, say so in the report and ask — do not invent a new top-level section, and never create a dated one.
+
+   | Finding | File > Section |
+   |---|---|
+   | New/changed initiative or epic | projects.md > ## Active Initiatives |
+   | Priority shift | projects.md > ## Current Priorities |
+   | Incident opened/updated | projects.md > ## Active Incidents (resolved = remove) |
+   | Significant architectural change, or stalled >2wk | projects.md > ## In-Flight Technical Changes |
+   | Release state | projects.md > ## Release Approval Queue |
+   | New service, tool or URL | projects.md > ## Systems & Platforms, or company.md > ## Key Systems / ## Key Tools / ## Service URLs |
+   | Action the user must take | my-work.md > ## Master List > ### Now / Next / Later / Parked |
+   | Completed item | my-work.md — remove from Master List; if win-worthy add to ## Recent Wins |
+   | Recurring failure pattern | my-work.md > ## Systemic Issues |
+   | Person observation, working style, coaching signal | memory/people/[first-last].md > matching ## heading |
+   | Sensitivity, friction, political risk | dynamics.md > ## HIGH Sensitivity / ## Team Dynamics / ## Event-Based Dynamics / ## Organizational Sensitivities |
+   | Org structure, domain ownership, process change | company.md > ## Engineering Organization / ## Key Processes / ## Recent Changes |
+   | Meeting recording, cadence change, prep note | meetings.md > ## Recurring Meetings > relevant subsection |
+
+   For each change state one of: **NEW** (add a bullet inside that section), **UPDATE** (rewrite an identified existing bullet — quote the line you are replacing), or **REMOVE** (resolved or superseded).
+
+   `company.md > ## Recent Changes` is a curated rolling list of *org* changes, not a per-run log. Cap it at ~15 bullets and drop the oldest.
 3. Present summary and **ask before applying** — sync is an exception to the "never ask for confirmation" rule because it proposes bulk changes across multiple memory files at once; the user should review the batch before it's written.
 4. When applying, set `*Last synced:*` to the earliest `pull_timestamp` returned by the subagents — **NOT** the current time (data may have changed between the fetch and the apply)
 
 ## Rules
 
-- Do NOT remove existing memory entries unless explicitly told to
+- **Merge, don't append.** Every finding lands *inside* an existing canonical section. Superseded text is rewritten in place, not left alongside the new version. Removing an entry is correct when this run's findings supersede or resolve it — that is not licence to delete unrelated content.
 - Do NOT add duplicate content already captured
 - Ask about ambiguous items rather than guessing
 - Subagents are research-only — all edits happen in main agent after user approval
 - When adding work items discovered in ~~messaging, follow the my-work.md conventions (Now/Next/Later tiers)
 - my-work.md items must be actionable — only add items where the user needs to act, decide, follow up, or monitor an outcome. Do NOT add FYI items, completed events, things other people own with no user involvement, or general awareness items. Those belong in projects.md, the relevant person's file in `memory/people/`, or company.md instead. If an item has no clear "user should do X" or "user needs to check Y", it does not belong in my-work.md.
-- Note sync timestamp (ISO 8601) at top of each updated file
+- Set the `*Last synced:*` line on line 1 of each updated file to the ISO 8601 timestamp. **That line is the only thing written at the top of a memory file.**
+- **NEVER create a dated section in a memory file.** Do not write headings of the form `## Recent Changes (<date>, <run> sync)`, `## <Month> <Day> ... Sync`, `### <date> sync — no new developments`, or anything containing `(added by ... sync)`. Memory files are a snapshot of current truth with no run history in them.
+- **If a run finds nothing for a file, write nothing to that file.** Do not record "no new developments" in memory — record it in the sync report.
+- **Precedent is not permission.** If a memory file already contains dated sections, that is drift left over from before this rule, not the format. Do not match it.
+- Tooling quirks go in `sync/tooling-caveats.md` (edited only when the behaviour changes), never as notes prepended to `sync/sources.md` — that file is configuration, not a log.
+
+### Phase 5: Write the sync report
+
+Write the run narrative to `$EA_ROOT/sync/YYYY-MM-DD-<run>-sync-report.md` (`<run>` = morning | midday | evening | scheduled). **This file is the only place a dated account of the run is recorded.**
+
+```
+# Sync Report — YYYY-MM-DD <Run>
+**Cutoff:** <iso> → **Pull window end:** <iso>   **Mode:** <attended|scheduled>
+## Subagents run
+## Changes applied (file > section > NEW/UPDATE/REMOVE)
+## Findings not written to memory (judgement calls)
+## Open items surfaced
+## Tooling/data-quality notes
+```
