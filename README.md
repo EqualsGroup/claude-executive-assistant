@@ -254,6 +254,32 @@ lives in your folder, not in the plugin. Plugin updates never touch your
 data. The SessionStart hook auto-detects the memory location across
 environments — Cowork mounted folder or local `~/claude-executive-assistant/`.
 
+## Public pull-request quality gate
+
+A central, API-only workflow reviews public PR diffs and review feedback through
+Vercel AI Gateway, with zero approval prerequisites and no checkout or execution of
+PR code. It reviews drafts too. It uses the separate
+`PUBLIC_AI_QUALITY_GATE_GATEWAY_API_KEY` secret; maintainers must provision that
+public-repository credential before enabling the gate. No existing private key is
+reused or published.
+
+The gate fails closed on incomplete patches (including binary changes), more than
+300 files, over 500 KiB of evidence, pagination limits, invalid model output, stale
+heads, or provider errors. It posts a fresh verdict labelled with the exact PR
+head SHA; it never reuses old verdicts. Merge queues pass through after individual
+PR assessment. API-only review has less context than a checked-out code review.
+
+The privileged workflow uses `pull_request_target` so it executes trusted workflow
+code from the base branch and treats PR strings as data. Its first installation
+PR cannot exercise that workflow until the trusted version reaches `main`.
+Independent, unprivileged CI runs the dependency-free tests on PRs:
+
+```bash
+node --test tests/public-ai-quality-gate.test.mjs
+```
+
+The public workflow uses the documented [Gateway structured-output API](https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/structured-outputs).
+
 ## License
 
 AGPL-3.0 — see [LICENSE](LICENSE)
