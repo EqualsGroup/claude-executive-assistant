@@ -33,6 +33,7 @@ async function assess(options = {}) {
     requests = [],
     apiCalls = [];
   let headReads = 0;
+  let providerRequested = false;
   const pr = {
     number: 7,
     state: "open",
@@ -40,7 +41,11 @@ async function assess(options = {}) {
     body: options.body ?? "",
     changed_files: options.changedFiles ?? 1,
     head: { sha },
-    base: { sha: "b".repeat(40) },
+    base: {
+      sha: "b".repeat(40),
+      ref: "main",
+      repo: { id: 1, full_name: "public-org/public-repo" },
+    },
   };
   const files = options.files ?? [
     {
@@ -61,6 +66,17 @@ async function assess(options = {}) {
           return {
             data: {
               ...pr,
+              base:
+                options.baseAt && headReads >= options.baseAt
+                  ? {
+                      ...pr.base,
+                      ...options.baseChange,
+                      repo: {
+                        ...pr.base.repo,
+                        ...(options.baseChange?.repo ?? {}),
+                      },
+                    }
+                  : pr.base,
               head: {
                 sha:
                   options.staleAt && headReads >= options.staleAt
@@ -75,11 +91,17 @@ async function assess(options = {}) {
             ? options.filePage(page)
             : files.slice((page - 1) * 100, page * 100),
         }),
-        listReviews: async ({ page }) => ({
-          data: options.reviewPage
-            ? options.reviewPage(page)
-            : reviews.slice((page - 1) * 100, page * 100),
-        }),
+        listReviews: async ({ page }) => {
+          const currentReviews =
+            providerRequested && options.afterReviews !== undefined
+              ? options.afterReviews
+              : reviews;
+          return {
+            data: options.reviewPage
+              ? options.reviewPage(page)
+              : currentReviews.slice((page - 1) * 100, page * 100),
+          };
+        },
       },
       issues: {
         createComment: async ({ body }) => {
@@ -90,8 +112,12 @@ async function assess(options = {}) {
     },
     graphql: async (query, variables) => {
       apiCalls.push("graphql");
-      if (options.graphql) return options.graphql(query, variables);
-      const nodes = options.threads ?? [];
+      if (options.graphql)
+        return options.graphql(query, variables, providerRequested);
+      const nodes =
+        providerRequested && options.afterThreads !== undefined
+          ? options.afterThreads
+          : (options.threads ?? []);
       return {
         repository: {
           pullRequest: {
@@ -106,6 +132,7 @@ async function assess(options = {}) {
     },
   };
   const fetch = async (url, init) => {
+    providerRequested = true;
     requests.push({ url, ...init, parsedBody: JSON.parse(init.body) });
     if (options.fetch) return options.fetch(url, init);
     if (options.httpError)
@@ -642,5 +669,80 @@ test("unprivileged test workflow has no secrets or write permissions", async () 
     [...ci.matchAll(/uses: ([^\n]+)/g)].every((m) =>
       /@[0-9a-f]{40}/.test(m[1]),
     ),
+  );
+});
+
+test("same-head retargeting, base advancement and repository changes fail before provider or publication", async () => {
+  for (const baseAt of [2, 3]) {
+    for (const baseChange of [
+      { ref: "release" },
+      { sha: "e".repeat(40) },
+      { repo: { id: 2 } },
+      { repo: { full_name: "other-org/other-repo" } },
+    ]) {
+      const r = await assess({ baseAt, baseChange });
+      failed(r);
+      assert.equal(r.comments.length, 0);
+      assert.equal(r.requests.length, baseAt === 2 ? 0 : 1);
+    }
+  }
+});
+
+test("new changes-requested reviews or unresolved threads during assessment prevent PASS", async () => {
+  const changes = {
+    id: 2,
+    user: { login: "reviewer" },
+    state: "CHANGES_REQUESTED",
+    submitted_at: "2026-01-02",
+  };
+  for (const options of [
+    { afterReviews: [changes] },
+    { afterThreads: [thread({ isResolved: false })] },
+  ]) {
+    const r = await assess(options);
+    failed(r);
+    assert.equal(r.requests.length, 1);
+    assert.match(r.failures[0], /Review feedback changed/);
+  }
+});
+
+test("the feedback recheck is complete and paginated, and errors fail closed", async () => {
+  const afterReviews = Array.from({ length: 101 }, (_, id) => ({
+    id,
+    user: { login: `reviewer-${id}` },
+    state: id === 100 ? "CHANGES_REQUESTED" : "APPROVED",
+    submitted_at: "2026-01-02",
+  }));
+  failed(await assess({ afterReviews }));
+  const r = await assess({
+    graphql: async (_query, _variables, afterProvider) => {
+      if (afterProvider) throw new Error("feedback API unavailable");
+      return {
+        repository: {
+          pullRequest: {
+            reviewThreads: {
+              totalCount: 0,
+              nodes: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
+        },
+      };
+    },
+  });
+  failed(r);
+  assert.equal(r.requests.length, 1);
+});
+
+test("model evidence identifies the exact base as well as the head", async () => {
+  const r = await assess();
+  assert.deepEqual(
+    JSON.parse(r.requests[0].parsedBody.messages[1].content).base,
+    {
+      repositoryId: 1,
+      repositoryFullName: "public-org/public-repo",
+      ref: "main",
+      sha: "b".repeat(40),
+    },
   );
 });

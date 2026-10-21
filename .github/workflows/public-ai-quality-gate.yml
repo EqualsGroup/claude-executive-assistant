@@ -32,6 +32,7 @@ jobs:
             const MARKER = "<!-- public-ai-quality-gate -->";
             let number;
             let assessedSha;
+            let assessedBase;
             let providerStatus;
             const repo = context.repo;
             const key = (process.env.PUBLIC_AI_QUALITY_GATE_GATEWAY_API_KEY || "").trim();
@@ -55,11 +56,22 @@ jobs:
                 .replace(/@/g, "&#64;");
             };
             const comment = (verdict, text) =>
-              `${MARKER}\n<!-- public-ai-quality-gate-sha:${assessedSha} -->\n<!-- public-ai-quality-gate-verdict:${verdict} -->\n### Public AI quality gate: ${verdict}\n\nHead: \`${assessedSha}\`\n\n${text}`;
-            const sameHead = async () => {
+              `${MARKER}\n<!-- public-ai-quality-gate-sha:${assessedSha} -->\n<!-- public-ai-quality-gate-base:${assessedBase.repositoryId}:${assessedBase.sha} -->\n<!-- public-ai-quality-gate-verdict:${verdict} -->\n### Public AI quality gate: ${verdict}\n\nHead: \`${assessedSha}\`\nBase: ${escape(assessedBase.repositoryFullName)}:${escape(assessedBase.ref)} at \`${assessedBase.sha}\`\n\n${text}`;
+            const baseIdentity = (pr) => ({
+              repositoryId: pr.base?.repo?.id,
+              repositoryFullName: pr.base?.repo?.full_name,
+              ref: pr.base?.ref,
+              sha: pr.base?.sha,
+            });
+            const sameSnapshot = async () => {
               const latest = (await github.rest.pulls.get({ ...repo, pull_number: number }))
                 .data;
-              return latest.state === "open" && latest.head.sha === assessedSha;
+              return (
+                assessedBase &&
+                latest.state === "open" &&
+                latest.head.sha === assessedSha &&
+                JSON.stringify(baseIdentity(latest)) === JSON.stringify(assessedBase)
+              );
             };
             const pageArray = async (endpoint, parameters, accept) => {
               for (let page = 1; page <= LIMITS.pages; page++) {
@@ -158,105 +170,7 @@ jobs:
                 },
               },
             };
-            const SAFE_ERRORS = new Set([
-              "Comment limit",
-              "Comment pagination limit",
-              "Evidence limit",
-              "File limit",
-              "Incomplete comments",
-              "Incomplete file list",
-              "Incomplete patch",
-              "Incomplete response",
-              "Incomplete threads",
-              "Invalid API page",
-              "Invalid PR",
-              "Invalid PR evidence",
-              "Invalid assessment",
-              "Invalid comment",
-              "Invalid finding",
-              "Invalid pagination",
-              "Invalid review evidence",
-              "Invalid thread",
-              "Invalid thread evidence",
-              "Missing credential",
-              "Pagination did not advance",
-              "Pagination limit",
-              "Provider unavailable",
-              "Response limit",
-              "Stale assessment",
-              "Stale event",
-              "Stale snapshot",
-              "Thread pagination limit",
-              "Threads changed during collection",
-              "Unsupported event",
-            ]);
-            try {
-              if (context.eventName === "merge_group") {
-                core.info(
-                  "[PublicAIQualityGate] Merge queue pass-through; assessments run on individual pull-request heads.",
-                );
-                return;
-              }
-              if (context.eventName !== "pull_request_target")
-                throw new Error("Unsupported event");
-              number = context.payload.pull_request?.number;
-              if (!Number.isInteger(number) || number < 1) throw new Error("Invalid PR");
-              const pr = (await github.rest.pulls.get({ ...repo, pull_number: number }))
-                .data;
-              if (
-                pr.state !== "open" ||
-                !/^[0-9a-f]{40}$/.test(pr.head?.sha) ||
-                pr.head.sha !== context.payload.pull_request.head.sha
-              )
-                throw new Error("Stale event");
-              assessedSha = pr.head.sha;
-              if (!key) throw new Error("Missing credential");
-              if (
-                !Number.isInteger(pr.changed_files) ||
-                pr.changed_files < 0 ||
-                pr.changed_files > LIMITS.files
-              )
-                throw new Error("File limit");
-              if (
-                typeof pr.title !== "string" ||
-                (pr.body !== null && typeof pr.body !== "string")
-              )
-                throw new Error("Invalid PR evidence");
-              const evidence = {
-                headSha: assessedSha,
-                title: pr.title,
-                body: pr.body || "",
-                files: [],
-                reviews: [],
-                threads: [],
-              };
-              bounded(evidence);
-              await pageArray(
-                github.rest.pulls.listFiles,
-                { pull_number: number },
-                (files) => {
-                  for (const file of files) {
-                    if (typeof file.filename !== "string" || !validPatch(file))
-                      throw new Error("Incomplete patch");
-                    evidence.files.push({
-                      filename: file.filename,
-                      previousFilename: file.previous_filename || null,
-                      status: file.status,
-                      additions: file.additions,
-                      deletions: file.deletions,
-                      patch: file.patch ?? null,
-                    });
-                  }
-                  if (evidence.files.length > LIMITS.files) throw new Error("File limit");
-                  bounded(evidence);
-                },
-              );
-              if (
-                evidence.files.length !== pr.changed_files ||
-                new Set(evidence.files.map((f) => f.filename)).size !==
-                  evidence.files.length
-              )
-                throw new Error("Incomplete file list");
+            const collectFeedback = async (evidence) => {
               await pageArray(
                 github.rest.pulls.listReviews,
                 { pull_number: number },
@@ -360,7 +274,124 @@ jobs:
                 new Set(evidence.threads.map((t) => t.id)).size !== evidence.threads.length
               )
                 throw new Error("Incomplete threads");
-              if (!(await sameHead())) throw new Error("Stale snapshot");
+            };
+            const feedbackSnapshot = (evidence) =>
+              JSON.stringify({ reviews: evidence.reviews, threads: evidence.threads });
+            const SAFE_ERRORS = new Set([
+              "Comment limit",
+              "Comment pagination limit",
+              "Evidence limit",
+              "File limit",
+              "Incomplete comments",
+              "Incomplete file list",
+              "Incomplete patch",
+              "Incomplete response",
+              "Incomplete threads",
+              "Invalid API page",
+              "Invalid PR",
+              "Invalid PR evidence",
+              "Invalid PR base",
+              "Review feedback changed during assessment",
+              "Invalid assessment",
+              "Invalid comment",
+              "Invalid finding",
+              "Invalid pagination",
+              "Invalid review evidence",
+              "Invalid thread",
+              "Invalid thread evidence",
+              "Missing credential",
+              "Pagination did not advance",
+              "Pagination limit",
+              "Provider unavailable",
+              "Response limit",
+              "Stale assessment",
+              "Stale event",
+              "Stale snapshot",
+              "Thread pagination limit",
+              "Threads changed during collection",
+              "Unsupported event",
+            ]);
+            try {
+              if (context.eventName === "merge_group") {
+                core.info(
+                  "[PublicAIQualityGate] Merge queue pass-through; assessments run on individual pull-request heads.",
+                );
+                return;
+              }
+              if (context.eventName !== "pull_request_target")
+                throw new Error("Unsupported event");
+              number = context.payload.pull_request?.number;
+              if (!Number.isInteger(number) || number < 1) throw new Error("Invalid PR");
+              const pr = (await github.rest.pulls.get({ ...repo, pull_number: number }))
+                .data;
+              if (
+                pr.state !== "open" ||
+                !/^[0-9a-f]{40}$/.test(pr.head?.sha) ||
+                pr.head.sha !== context.payload.pull_request.head.sha
+              )
+                throw new Error("Stale event");
+              assessedBase = baseIdentity(pr);
+              if (
+                !Number.isInteger(assessedBase.repositoryId) ||
+                assessedBase.repositoryId <= 0 ||
+                typeof assessedBase.repositoryFullName !== "string" ||
+                assessedBase.repositoryFullName.toLowerCase() !==
+                  `${repo.owner}/${repo.repo}`.toLowerCase() ||
+                !text(assessedBase.ref, 1024, true) ||
+                !/^[0-9a-f]{40}$/.test(assessedBase.sha)
+              )
+                throw new Error("Invalid PR base");
+              assessedSha = pr.head.sha;
+              if (!key) throw new Error("Missing credential");
+              if (
+                !Number.isInteger(pr.changed_files) ||
+                pr.changed_files < 0 ||
+                pr.changed_files > LIMITS.files
+              )
+                throw new Error("File limit");
+              if (
+                typeof pr.title !== "string" ||
+                (pr.body !== null && typeof pr.body !== "string")
+              )
+                throw new Error("Invalid PR evidence");
+              const evidence = {
+                headSha: assessedSha,
+                base: assessedBase,
+                title: pr.title,
+                body: pr.body || "",
+                files: [],
+                reviews: [],
+                threads: [],
+              };
+              bounded(evidence);
+              await pageArray(
+                github.rest.pulls.listFiles,
+                { pull_number: number },
+                (files) => {
+                  for (const file of files) {
+                    if (typeof file.filename !== "string" || !validPatch(file))
+                      throw new Error("Incomplete patch");
+                    evidence.files.push({
+                      filename: file.filename,
+                      previousFilename: file.previous_filename || null,
+                      status: file.status,
+                      additions: file.additions,
+                      deletions: file.deletions,
+                      patch: file.patch ?? null,
+                    });
+                  }
+                  if (evidence.files.length > LIMITS.files) throw new Error("File limit");
+                  bounded(evidence);
+                },
+              );
+              if (
+                evidence.files.length !== pr.changed_files ||
+                new Set(evidence.files.map((f) => f.filename)).size !==
+                  evidence.files.length
+              )
+                throw new Error("Incomplete file list");
+              await collectFeedback(evidence);
+              if (!(await sameSnapshot())) throw new Error("Stale snapshot");
               const response = await fetch(
                 "https://ai-gateway.vercel.sh/v1/chat/completions",
                 {
@@ -483,7 +514,11 @@ jobs:
                 `${escape(assessment.headline)}${unresolved ? "\n\nUnresolved review feedback blocks this head." : ""}${findings ? "\n\n" + findings : ""}`,
               );
               if (Buffer.byteLength(body, "utf8") > 60000) throw new Error("Comment limit");
-              if (!(await sameHead())) throw new Error("Stale assessment");
+              const latestEvidence = { ...evidence, reviews: [], threads: [] };
+              await collectFeedback(latestEvidence);
+              if (feedbackSnapshot(latestEvidence) !== feedbackSnapshot(evidence))
+                throw new Error("Review feedback changed during assessment");
+              if (!(await sameSnapshot())) throw new Error("Stale assessment");
               await github.rest.issues.createComment({
                 ...repo,
                 issue_number: number,
@@ -506,7 +541,7 @@ jobs:
               fail(reason);
               if (number && assessedSha && /^[0-9a-f]{40}$/.test(assessedSha)) {
                 try {
-                  if (await sameHead())
+                  if (await sameSnapshot())
                     await github.rest.issues.createComment({
                       ...repo,
                       issue_number: number,

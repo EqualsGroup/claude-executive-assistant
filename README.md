@@ -265,8 +265,8 @@ reused or published.
 
 The gate fails closed on incomplete patches (including binary changes), more than
 300 files, over 500 KiB of evidence, pagination limits, invalid model output, stale
-heads, or provider errors. It posts a fresh verdict labelled with the exact PR
-head SHA; it never reuses old verdicts. Merge queues pass through after individual
+heads or bases, changed review feedback, or provider errors. It posts a fresh verdict labelled with the exact PR
+head and base SHA; it never reuses old verdicts. Merge queues pass through after individual
 PR assessment. API-only review has less context than a checked-out code review.
 
 The privileged workflow uses `pull_request_target` so it executes trusted workflow
